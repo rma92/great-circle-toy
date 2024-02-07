@@ -1,0 +1,54 @@
+.open airports.db
+CREATE TABLE airports (
+    id INTEGER,
+    name TEXT,
+    city TEXT,
+    country TEXT,
+    iata_code TEXT,
+    icao_code TEXT,
+    latitude REAL,
+    longitude REAL,
+    altitude INTEGER,
+    timezone INTEGER,
+    dst TEXT,
+    tz_database TEXT,
+    type TEXT,
+    source TEXT
+);
+.mode csv
+.import airports-extended.dat airports
+
+--select json_group_object(iata_code, json_array(latitude, longitude)) from (select * from airports limit 5);
+
+--select json_group_object(iata_code, json_array(latitude, longitude)) from (select * from airports limit 5);
+
+--select id, name, city, country, iata_code, icao_code, type from airports limit 5;
+
+--create an object to lookup airports by ID.
+.mode list
+.header off
+.output airports.js
+select 'var _airports = {' || a || '};' from (select group_concat( id || ':' || json_object(  'name', name,
+        'city', city,
+        'country', country,
+        'iata_code', iata_code,
+        'icao_code', icao_code,
+	'lat', latitude,
+	'lon', longitude,
+        'type', type
+    ), ',' ) as a from (select id, name, city, country, iata_code, icao_code, latitude, longitude, type from airports limit 50000) );
+
+
+--Create an object to look up airports by IATA.
+select 'var _airports_iata = ' || json_group_object(iata_code, id) from (select * from airports limit 50000);
+
+--Create an object to look up airports by ICAO.
+select 'var _airports_icao = ' || json_group_object(icao_code, id) from (select * from airports limit 50000);
+
+--Create an object to look up by either IATA or ICAO.
+SELECT 'var _airports_key = ' ||json_group_object(key, id) FROM (
+SELECT iata_code AS key, id FROM airports WHERE key != '\N'
+UNION
+SELECT icao_code AS key, id FROM airports WHERE key != '\N');
+.output stdout
+

@@ -1,0 +1,23 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+</head>
+<body>
+Notice: Distances are approximate.
+<input id=route name=route value="JFK-LHR, LCY-DUB, MUC-HAM-AMS"/><button id=go name=go>Go</button>
+<br/>
+<div id=outBox></div>
+</body>
+<script src="airports.js"></script>
+<script src="a.js"></script>
+<script>
+document.getElementById("go").addEventListener("click", function() {
+  // Get the value of the input box with ID "route"
+  const route = document.getElementById("route").value;
+  
+  // Invoke processRoute function on the route value
+  processRouteString(route);
+  document.getElementById("outBox").innerHTML = szOut + szOutSuffix;
+});
+</script>
+</html>
